@@ -24,6 +24,8 @@ dependencies {
     implementation "org.apache.commons:commons-csv:1.8"
     implementation "org.apache.commons:commons-compress:1.21"
     implementation 'com.github.luben:zstd-jni:1.5.2-1'
+
+    implementation 'commons-cli:commons-cli:1.5.0'
 }
 
 test {
