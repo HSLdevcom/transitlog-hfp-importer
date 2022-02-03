@@ -11,14 +11,17 @@ import kotlin.time.ExperimentalTime
 
 @ExperimentalTime
 class HfpImporter(private val dataDirectory: Path, private val blobServiceClient: BlobServiceClient, private val blobContainer: String, private val databaseConnection: Connection) {
+    companion object {
+        private const val QUEUE_SIZE = 15 //There are 14 event types -> 14 blobs per hour -> allow processing 15 blobs at the same time
+    }
+
     private val log = KotlinLogging.logger {}
 
     fun importDataFrom(minDateTime: ZonedDateTime, maxDateTime: ZonedDateTime) {
         log.info { "Importing data from $minDateTime to $maxDateTime" }
 
-        //TODO: limit queue size to avoid running out of memory
-        val blobQueue = LinkedBlockingQueue<BlobQueueItem>()
-        val hfpArchiveQueue = LinkedBlockingQueue<HfpArchiveQueueItem>()
+        val blobQueue = LinkedBlockingQueue<BlobQueueItem>(QUEUE_SIZE)
+        val hfpArchiveQueue = LinkedBlockingQueue<HfpArchiveQueueItem>(QUEUE_SIZE)
 
         val threadGroup = object : ThreadGroup("HfpImporterThreadGroup") {
             override fun uncaughtException(t: Thread, e: Throwable) {
