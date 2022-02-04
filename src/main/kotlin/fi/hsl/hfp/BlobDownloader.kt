@@ -4,6 +4,7 @@ import com.azure.storage.blob.BlobServiceClient
 import com.azure.storage.blob.models.TaggedBlobItem
 import fi.hsl.hfp.utils.roundToString
 import mu.KotlinLogging
+import java.nio.file.Files
 import java.nio.file.Path
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -39,6 +40,7 @@ class BlobDownloader(private val blobServiceClient: BlobServiceClient, private v
 
         for (blobName in blobNames) {
             val file = directory.resolve(blobName).toAbsolutePath()
+            Files.deleteIfExists(file)
 
             val timedValue = measureTimedValue {
                 blobContainerClient.getBlobClient(blobName).downloadToFile(file.toString())
