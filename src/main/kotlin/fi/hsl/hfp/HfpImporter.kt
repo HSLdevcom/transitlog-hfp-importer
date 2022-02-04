@@ -2,6 +2,7 @@ package fi.hsl.hfp
 
 import com.azure.storage.blob.BlobServiceClient
 import fi.hsl.hfp.domain.HfpArchive
+import fi.hsl.hfp.utils.isBetween
 import mu.KotlinLogging
 import java.nio.file.Path
 import java.sql.Connection
@@ -19,6 +20,13 @@ class HfpImporter(private val dataDirectory: Path, private val blobServiceClient
 
     fun importDataFrom(minDateTime: ZonedDateTime, maxDateTime: ZonedDateTime) {
         log.info { "Importing data from $minDateTime to $maxDateTime" }
+
+        val dbHelper = DbHelper(databaseConnection)
+        for (dbTable in DbTableHelper.databaseTables) {
+            val rowsDeleted = dbHelper.deleteDataFromPeriod(dbTable, minDateTime, maxDateTime)
+
+            log.info { "Deleted $rowsDeleted rows from $dbTable from time period $minDateTime - $maxDateTime" }
+        }
 
         val blobQueue = LinkedBlockingQueue<BlobQueueItem>(QUEUE_SIZE)
         val hfpArchiveQueue = LinkedBlockingQueue<HfpArchiveQueueItem>(QUEUE_SIZE)
@@ -68,7 +76,11 @@ class HfpImporter(private val dataDirectory: Path, private val blobServiceClient
                         break
                     }
                     is HfpArchiveQueueItem.Archive -> {
-                        dbBatchInserter.insertEvents(hfpArchiveQueueItem.hfpArchive)
+                        val hfpArchive = hfpArchiveQueueItem.hfpArchive
+                        //Only insert data from the specified time period
+                        val eventsFiltered = hfpArchive.events.filter { it.tst.isBetween(minDateTime.toOffsetDateTime(), maxDateTime.toOffsetDateTime()) }
+
+                        dbBatchInserter.insertEvents(hfpArchive.copy(events = eventsFiltered))
                     }
                 }
             }
