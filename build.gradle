@@ -1,4 +1,5 @@
 plugins {
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
     id 'org.jetbrains.kotlin.jvm' version '1.5.10'
     id 'application'
 }
@@ -26,6 +27,12 @@ dependencies {
     implementation 'com.github.luben:zstd-jni:1.5.2-1'
 
     implementation 'commons-cli:commons-cli:1.5.0'
+}
+
+shadowJar {
+    archiveBaseName.set('transitlog-hfp-importer')
+    archiveClassifier.set('')
+    archiveVersion.set('')
 }
 
 test {
