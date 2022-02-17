@@ -2,6 +2,8 @@ package fi.hsl.hfp
 
 import fi.hsl.hfp.domain.HfpArchive
 import fi.hsl.transitlog.hfp.domain.Event
+import fi.hsl.transitlog.hfp.domain.IEvent
+import fi.hsl.transitlog.hfp.domain.LightPriorityEvent
 import mu.KotlinLogging
 import org.apache.commons.compress.compressors.zstandard.ZstdCompressorInputStream
 import org.apache.commons.csv.CSVFormat
@@ -36,7 +38,7 @@ class HfpParser {
 
         val timedValue = measureTimedValue {
             createCsvParser(path).use {
-                val events = ArrayList<Event>()
+                val events = ArrayList<IEvent>()
 
                 it.forEach { csvRecord ->
                     if (eventType == null) {
@@ -49,51 +51,112 @@ class HfpParser {
                         }
                     }
 
-                    events += Event(
-                        UUID.fromString(csvRecord["uuid"]),
-                        OffsetDateTime.parse(csvRecord["tst"]),
-                        csvRecord["uniqueVehicleId"],
-                        csvRecord["eventType"],
-                        csvRecord["journeyType"],
-                        Instant.parse(csvRecord["receivedAt"]),
-                        csvRecord["topicPrefix"],
-                        csvRecord["topicVersion"],
-                        csvRecord["isOngoing"].toBooleanStrictOrNull(),
-                        csvRecord["mode"],
-                        csvRecord["ownerOperatorId"].toIntOrNull(),
-                        csvRecord["vehicleNumber"].toIntOrNull(),
-                        csvRecord["routeId"],
-                        csvRecord["directionId"].toIntOrNull(),
-                        csvRecord["headsign"],
-                        LocalTime.parse(csvRecord["journeyStartTime"]),
-                        csvRecord["nextStopId"],
-                        csvRecord["geohashLevel"].toIntOrNull(),
-                        csvRecord["topicLatitude"].toDoubleOrNull(),
-                        csvRecord["topicLongitude"].toDoubleOrNull(),
-                        csvRecord["latitude"].toDoubleOrNull(),
-                        csvRecord["longitude"].toDoubleOrNull(),
-                        csvRecord["desi"],
-                        csvRecord["dir"].toIntOrNull(),
-                        csvRecord["oper"].toIntOrNull(),
-                        csvRecord["veh"].toIntOrNull(),
-                        csvRecord["tsi"].toLongOrNull(),
-                        csvRecord["spd"].toDoubleOrNull(),
-                        csvRecord["hdg"].toIntOrNull(),
-                        csvRecord["acc"].toDoubleOrNull(),
-                        csvRecord["dl"].toIntOrNull(),
-                        csvRecord["odo"].toDoubleOrNull(),
-                        csvRecord["drst"].toBooleanStrictOrNull(),
-                        LocalDate.parse(csvRecord["oday"]),
-                        csvRecord["jrn"].toIntOrNull(),
-                        csvRecord["line"].toIntOrNull(),
-                        LocalTime.parse(csvRecord["start"]),
-                        csvRecord["locationQualityMethod"],
-                        csvRecord["stop"].toIntOrNull(),
-                        csvRecord["route"],
-                        csvRecord["occu"].toIntOrNull(),
-                        csvRecord["seq"].toIntOrNull(),
-                        csvRecord["drType"].toIntOrNull()
-                    )
+                    if (eventType == "TLA" || eventType == "TLR") {
+                        events += LightPriorityEvent(
+                            UUID.fromString(csvRecord["uuid"]),
+                            OffsetDateTime.parse(csvRecord["tst"]),
+                            csvRecord["uniqueVehicleId"],
+                            csvRecord["eventType"],
+                            csvRecord["journeyType"],
+                            Instant.parse(csvRecord["receivedAt"]),
+                            csvRecord["topicPrefix"],
+                            csvRecord["topicVersion"],
+                            csvRecord["isOngoing"].toBooleanStrictOrNull(),
+                            csvRecord["mode"],
+                            csvRecord["ownerOperatorId"].toIntOrNull(),
+                            csvRecord["vehicleNumber"].toIntOrNull(),
+                            csvRecord["routeId"],
+                            csvRecord["directionId"].toIntOrNull(),
+                            csvRecord["headsign"],
+                            LocalTime.parse(csvRecord["journeyStartTime"]),
+                            csvRecord["nextStopId"],
+                            csvRecord["geohashLevel"].toIntOrNull(),
+                            csvRecord["topicLatitude"].toDoubleOrNull(),
+                            csvRecord["topicLongitude"].toDoubleOrNull(),
+                            csvRecord["latitude"].toDoubleOrNull(),
+                            csvRecord["longitude"].toDoubleOrNull(),
+                            csvRecord["desi"],
+                            csvRecord["dir"].toIntOrNull(),
+                            csvRecord["oper"].toIntOrNull(),
+                            csvRecord["veh"].toIntOrNull(),
+                            csvRecord["tsi"].toLongOrNull(),
+                            csvRecord["spd"].toDoubleOrNull(),
+                            csvRecord["hdg"].toIntOrNull(),
+                            csvRecord["acc"].toDoubleOrNull(),
+                            csvRecord["dl"].toIntOrNull(),
+                            csvRecord["odo"].toDoubleOrNull(),
+                            csvRecord["drst"].toBooleanStrictOrNull(),
+                            LocalDate.parse(csvRecord["oday"]),
+                            csvRecord["jrn"].toIntOrNull(),
+                            csvRecord["line"].toIntOrNull(),
+                            LocalTime.parse(csvRecord["start"]),
+                            csvRecord["locationQualityMethod"],
+                            csvRecord["stop"].toIntOrNull(),
+                            csvRecord["route"],
+                            csvRecord["occu"].toIntOrNull(),
+                            csvRecord["seq"].toIntOrNull(),
+                            csvRecord["drType"].toIntOrNull(),
+                            csvRecord["tlpRequestId"].toIntOrNull(),
+                            csvRecord["tlpRequestType"],
+                            csvRecord["tlpPriorityLevel"],
+                            csvRecord["tlpReason"],
+                            csvRecord["tlpAttSeq"].toIntOrNull(),
+                            csvRecord["tlpDecision"],
+                            csvRecord["sid"].toIntOrNull(),
+                            csvRecord["signalGroupId"].toIntOrNull(),
+                            csvRecord["tlpSignalGroupNbr"].toIntOrNull(),
+                            csvRecord["tlpLineConfigId"].toIntOrNull(),
+                            csvRecord["tlpPointConfigId"].toIntOrNull(),
+                            csvRecord["tlpFrequency"].toIntOrNull(),
+                            csvRecord["tlpProtocol"]
+                        )
+                    } else {
+                        events += Event(
+                            UUID.fromString(csvRecord["uuid"]),
+                            OffsetDateTime.parse(csvRecord["tst"]),
+                            csvRecord["uniqueVehicleId"],
+                            csvRecord["eventType"],
+                            csvRecord["journeyType"],
+                            Instant.parse(csvRecord["receivedAt"]),
+                            csvRecord["topicPrefix"],
+                            csvRecord["topicVersion"],
+                            csvRecord["isOngoing"].toBooleanStrictOrNull(),
+                            csvRecord["mode"],
+                            csvRecord["ownerOperatorId"].toIntOrNull(),
+                            csvRecord["vehicleNumber"].toIntOrNull(),
+                            csvRecord["routeId"],
+                            csvRecord["directionId"].toIntOrNull(),
+                            csvRecord["headsign"],
+                            LocalTime.parse(csvRecord["journeyStartTime"]),
+                            csvRecord["nextStopId"],
+                            csvRecord["geohashLevel"].toIntOrNull(),
+                            csvRecord["topicLatitude"].toDoubleOrNull(),
+                            csvRecord["topicLongitude"].toDoubleOrNull(),
+                            csvRecord["latitude"].toDoubleOrNull(),
+                            csvRecord["longitude"].toDoubleOrNull(),
+                            csvRecord["desi"],
+                            csvRecord["dir"].toIntOrNull(),
+                            csvRecord["oper"].toIntOrNull(),
+                            csvRecord["veh"].toIntOrNull(),
+                            csvRecord["tsi"].toLongOrNull(),
+                            csvRecord["spd"].toDoubleOrNull(),
+                            csvRecord["hdg"].toIntOrNull(),
+                            csvRecord["acc"].toDoubleOrNull(),
+                            csvRecord["dl"].toIntOrNull(),
+                            csvRecord["odo"].toDoubleOrNull(),
+                            csvRecord["drst"].toBooleanStrictOrNull(),
+                            LocalDate.parse(csvRecord["oday"]),
+                            csvRecord["jrn"].toIntOrNull(),
+                            csvRecord["line"].toIntOrNull(),
+                            LocalTime.parse(csvRecord["start"]),
+                            csvRecord["locationQualityMethod"],
+                            csvRecord["stop"].toIntOrNull(),
+                            csvRecord["route"],
+                            csvRecord["occu"].toIntOrNull(),
+                            csvRecord["seq"].toIntOrNull(),
+                            csvRecord["drType"].toIntOrNull()
+                        )
+                    }
                 }
 
                 return@use events.toList()
