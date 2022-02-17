@@ -43,9 +43,9 @@ class HfpParser {
                         eventType = csvRecord["eventType"]
 
                         if (eventType == "VP") {
-                            events.ensureCapacity(2000000)
+                            events.ensureCapacity(500000)
                         } else {
-                            events.ensureCapacity(20000)
+                            events.ensureCapacity(2000)
                         }
                     }
 
