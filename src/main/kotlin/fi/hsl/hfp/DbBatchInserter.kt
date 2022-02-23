@@ -21,27 +21,27 @@ class DbBatchInserter(private val connection: Connection) {
 
     private fun createQuery(dbTable: String): String = if (dbTable == "lightpriorityevent") {
         """
-            COPY $dbTable (acc,desi,dir,direction_id,dl,dr_type,drst,event_type,geohash_level,hdg,headsign,is_ongoing,journey_start_time,jrn,lat,line,loc,long,mode,next_stop_id,occu,oday,odo,oper,owner_operator_id,received_at,route,seq,spd,start,stop,topic_latitude,topic_longitude,topic_prefix,topic_version,tsi,tst,unique_vehicle_id,uuid,veh,vehicle_number,tlp_requestid,tlp_requesttype,tlp_prioritylevel,tlp_reason,tlp_att_seq,tlp_decision,sid,signal_groupid,tlp_signalgroupnbr,tlp_line_configid,tlp_point_configid,tlp_frequency,tlp_protocol)
+            COPY $dbTable (acc,desi,dir,direction_id,dl,dr_type,drst,event_type,geohash_level,hdg,headsign,is_ongoing,journey_start_time,journey_type,jrn,lat,line,loc,long,mode,next_stop_id,occu,oday,odo,oper,owner_operator_id,received_at,route,route_id,seq,spd,start,stop,topic_latitude,topic_longitude,topic_prefix,topic_version,tsi,tst,unique_vehicle_id,uuid,veh,vehicle_number,tlp_requestid,tlp_requesttype,tlp_prioritylevel,tlp_reason,tlp_att_seq,tlp_decision,sid,signal_groupid,tlp_signalgroupnbr,tlp_line_configid,tlp_point_configid,tlp_frequency,tlp_protocol)
                 FROM STDIN (FORMAT csv, HEADER)
         """
     } else {
         """
-            COPY $dbTable (acc,desi,dir,direction_id,dl,dr_type,drst,event_type,geohash_level,hdg,headsign,is_ongoing,journey_start_time,jrn,lat,line,loc,long,mode,next_stop_id,occu,oday,odo,oper,owner_operator_id,received_at,route,seq,spd,start,stop,topic_latitude,topic_longitude,topic_prefix,topic_version,tsi,tst,unique_vehicle_id,uuid,veh,vehicle_number)
+            COPY $dbTable (acc,desi,dir,direction_id,dl,dr_type,drst,event_type,geohash_level,hdg,headsign,is_ongoing,journey_start_time,journey_type,jrn,lat,line,loc,long,mode,next_stop_id,occu,oday,odo,oper,owner_operator_id,received_at,route,route_id,seq,spd,start,stop,topic_latitude,topic_longitude,topic_prefix,topic_version,tsi,tst,unique_vehicle_id,uuid,veh,vehicle_number)
                 FROM STDIN (FORMAT csv, HEADER)
         """
     }.trimIndent()
 
     private fun getCsvHeader(dbTable: String): Array<String> = if (dbTable == "lightpriorityevent") {
         arrayOf("acc", "desi", "dir", "direction_id", "dl", "dr_type", "drst", "event_type", "geohash_level", "hdg", "headsign", "is_ongoing",
-            "journey_start_time", "jrn", "lat", "line", "loc", "long", "mode", "next_stop_id", "occu", "oday", "odo", "oper", "owner_operator_id",
-            "received_at", "route", "seq", "spd", "start", "stop", "topic_latitude", "topic_longitude", "topic_prefix", "topic_version", "tsi", "tst",
-            "unique_vehicle_id", "uuid", "veh", "vehicle_number", "tlp_requestid", "tlp_requesttype", "tlp_prioritylevel", "tlp_reason", "tlp_att_seq",
+            "journey_start_time", "journey_type", "jrn", "lat", "line", "loc", "long", "mode", "next_stop_id", "occu", "oday", "odo", "oper",
+            "owner_operator_id", "received_at", "route", "route_id", "seq", "spd", "start", "stop", "topic_latitude", "topic_longitude", "topic_prefix", "topic_version",
+            "tsi", "tst", "unique_vehicle_id", "uuid", "veh", "vehicle_number", "tlp_requestid", "tlp_requesttype", "tlp_prioritylevel", "tlp_reason", "tlp_att_seq",
             "tlp_decision", "sid", "signal_groupid", "tlp_signalgroupnbr", "tlp_line_configid", "tlp_point_configid", "tlp_frequency", "tlp_protocol")
     } else {
         arrayOf("acc", "desi", "dir", "direction_id", "dl", "dr_type", "drst", "event_type", "geohash_level", "hdg", "headsign", "is_ongoing",
-            "journey_start_time", "jrn", "lat", "line", "loc", "long", "mode", "next_stop_id", "occu", "oday", "odo", "oper", "owner_operator_id",
-            "received_at", "route", "seq", "spd", "start", "stop", "topic_latitude", "topic_longitude", "topic_prefix", "topic_version", "tsi", "tst",
-            "unique_vehicle_id", "uuid", "veh", "vehicle_number")
+            "journey_start_time", "journey_type", "jrn", "lat", "line", "loc", "long", "mode", "next_stop_id", "occu", "oday", "odo", "oper",
+            "owner_operator_id", "received_at", "route", "route_id", "seq", "spd", "start", "stop", "topic_latitude", "topic_longitude", "topic_prefix", "topic_version",
+            "tsi", "tst", "unique_vehicle_id", "uuid", "veh", "vehicle_number")
     }
 
     fun insertEvents(hfpArchive: HfpArchive) {
@@ -69,6 +69,7 @@ class DbBatchInserter(private val connection: Connection) {
                             event.headsign,
                             event.isOngoing,
                             event.journeyStartTime,
+                            event.journeyType,
                             event.jrn,
                             event.latitude,
                             event.line,
@@ -83,6 +84,7 @@ class DbBatchInserter(private val connection: Connection) {
                             event.ownerOperatorId,
                             event.receivedAt,
                             event.route,
+                            event.routeId,
                             event.seq,
                             event.spd,
                             event.start,
@@ -126,6 +128,7 @@ class DbBatchInserter(private val connection: Connection) {
                             event.headsign,
                             event.isOngoing,
                             event.journeyStartTime,
+                            event.journeyType,
                             event.jrn,
                             event.latitude,
                             event.line,
@@ -140,6 +143,7 @@ class DbBatchInserter(private val connection: Connection) {
                             event.ownerOperatorId,
                             event.receivedAt,
                             event.route,
+                            event.routeId,
                             event.seq,
                             event.spd,
                             event.start,
