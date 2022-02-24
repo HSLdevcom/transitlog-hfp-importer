@@ -22,3 +22,7 @@ Options:
 * `-d` - JDBC database connection string, e.g. `"jdbc:postgresql://localhost:5432/postgres?user=postgres&password=password"`
 * `-f` - Minimum timestamp for data, in format `yyyy-MM-dd'T'HH:mm:ss`
 * `-t` - Maximum timestamp for data, in format `yyyy-MM-dd'T'HH:mm:ss`
+
+## Testing
+
+For testing this application, you can set up local Postgres database by using scripts `utils/run_local_db.sh` and `utils/create_db_tables.sh`. Database name will be `postgres` with user `postgres` and password `password`.
