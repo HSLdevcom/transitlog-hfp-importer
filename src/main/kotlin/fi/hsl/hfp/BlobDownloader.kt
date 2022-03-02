@@ -2,10 +2,12 @@ package fi.hsl.hfp
 
 import com.azure.storage.blob.BlobServiceClient
 import com.azure.storage.blob.models.TaggedBlobItem
+import fi.hsl.hfp.utils.retry
 import fi.hsl.hfp.utils.roundToString
 import mu.KotlinLogging
 import java.nio.file.Files
 import java.nio.file.Path
+import java.time.Duration
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -39,18 +41,23 @@ class BlobDownloader(private val blobServiceClient: BlobServiceClient, private v
         log.info { "${blobNames.size} blobs found containing data for time period from $minTstFormatted to $maxTstFormatted" }
 
         for (blobName in blobNames) {
-            val file = directory.resolve(blobName).toAbsolutePath()
-            Files.deleteIfExists(file)
+            val downloadBlob = {
+                val file = directory.resolve(blobName).toAbsolutePath()
+                Files.deleteIfExists(file)
 
-            val timedValue = measureTimedValue {
-                blobContainerClient.getBlobClient(blobName).downloadToFile(file.toString())
+                val timedValue = measureTimedValue {
+                    blobContainerClient.getBlobClient(blobName).downloadToFile(file.toString())
+                }
+
+                val blobSize = timedValue.value.blobSize / 1024 / 1024
+                val downloadSpeed = (((timedValue.value.blobSize.toDouble() / timedValue.duration.inWholeMilliseconds.toDouble()) * 1000.0) / (1024.0 * 1024.0)).roundToString(1)
+                log.info { "Downloaded $blobName from blob storage to $file in ${timedValue.duration.inWholeSeconds} seconds ($blobSize MB, $downloadSpeed MB/s)" }
+
+                onBlobDownloaded(file)
             }
 
-            val blobSize = timedValue.value.blobSize / 1024 / 1024
-            val downloadSpeed = (((timedValue.value.blobSize.toDouble() / timedValue.duration.inWholeMilliseconds.toDouble()) * 1000.0) / (1024.0 * 1024.0)).roundToString(1)
-            log.info { "Downloaded $blobName from blob storage to $file in ${timedValue.duration.inWholeSeconds} seconds ($blobSize MB, $downloadSpeed MB/s)" }
-
-            onBlobDownloaded(file)
+            //Azure download seems to fail sometimes, retry up to 5 times
+            retry(downloadBlob, Duration.ofSeconds(10), 5)
         }
     }
 
