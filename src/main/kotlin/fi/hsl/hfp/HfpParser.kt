@@ -1,5 +1,6 @@
 package fi.hsl.hfp
 
+import com.github.luben.zstd.RecyclingBufferPool
 import fi.hsl.hfp.domain.HfpArchive
 import fi.hsl.transitlog.hfp.domain.Event
 import fi.hsl.transitlog.hfp.domain.IEvent
@@ -27,7 +28,7 @@ class HfpParser {
     private val log = KotlinLogging.logger {}
 
     private fun createCsvParser(path: Path): CSVParser = CSVParser.parse(
-        InputStreamReader(ZstdCompressorInputStream(BufferedInputStream(Files.newInputStream(path), BUFFER_SIZE)), StandardCharsets.UTF_8),
+        InputStreamReader(ZstdCompressorInputStream(BufferedInputStream(Files.newInputStream(path), BUFFER_SIZE), RecyclingBufferPool.INSTANCE), StandardCharsets.UTF_8),
         CSVFormat.RFC4180.withFirstRecordAsHeader()
     )
 
