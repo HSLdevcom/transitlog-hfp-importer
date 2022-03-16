@@ -51,14 +51,14 @@ class DbBatchInserter(private val connection: Connection) {
             val copyIn = CopyManager(connection.unwrap(BaseConnection::class.java)).copyIn(createQuery(dbTable))
 
             val csvPrinter = CSVPrinter(OutputStreamWriter(PGCopyOutputStream(copyIn), StandardCharsets.UTF_8), CSVFormat.RFC4180.withHeader(*getCsvHeader(dbTable)))
-            csvPrinter.use {
+            try {
                 for (event in hfpArchive.events) {
                     //There seem to be some invalid hdg values in HFP data -> check if value is in correct range and set to null otherwise
                     val hdg = if (event.hdg in 0..360) { event.hdg } else { null }
                     //TODO: think about better way to handle errors in data
 
                     if (event is LightPriorityEvent) {
-                        it.printRecord(
+                        csvPrinter.printRecord(
                             event.acc,
                             event.desi,
                             event.dir,
@@ -117,7 +117,7 @@ class DbBatchInserter(private val connection: Connection) {
                             event.tlpProtocol
                         )
                     } else {
-                        it.printRecord(
+                        csvPrinter.printRecord(
                             event.acc,
                             event.desi,
                             event.dir,
@@ -164,8 +164,9 @@ class DbBatchInserter(private val connection: Connection) {
                         )
                     }
                 }
-
-                it.flush()
+            } finally {
+                csvPrinter.close(true)
+                copyIn.endCopy()
             }
         }
 
