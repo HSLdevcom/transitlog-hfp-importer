@@ -53,8 +53,11 @@ class DbBatchInserter(private val connection: Connection) {
             val csvPrinter = CSVPrinter(OutputStreamWriter(PGCopyOutputStream(copyIn), StandardCharsets.UTF_8), CSVFormat.RFC4180.withHeader(*getCsvHeader(dbTable)))
             csvPrinter.use {
                 for (event in hfpArchive.events) {
-                    if (event is LightPriorityEvent) {
+                    //There seem to be some invalid hdg values in HFP data -> check if value is in correct range and set to null otherwise
+                    val hdg = if (event.hdg in 0..360) { event.hdg } else { null }
+                    //TODO: think about better way to handle errors in data
 
+                    if (event is LightPriorityEvent) {
                         it.printRecord(
                             event.acc,
                             event.desi,
@@ -65,7 +68,7 @@ class DbBatchInserter(private val connection: Connection) {
                             event.drst,
                             event.eventType,
                             event.geohashLevel,
-                            event.hdg,
+                            hdg,
                             event.headsign,
                             event.isOngoing,
                             event.journeyStartTime,
@@ -124,7 +127,7 @@ class DbBatchInserter(private val connection: Connection) {
                             event.drst,
                             event.eventType,
                             event.geohashLevel,
-                            event.hdg,
+                            hdg,
                             event.headsign,
                             event.isOngoing,
                             event.journeyStartTime,
