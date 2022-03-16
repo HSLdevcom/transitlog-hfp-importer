@@ -166,7 +166,9 @@ class DbBatchInserter(private val connection: Connection) {
                 }
             } finally {
                 csvPrinter.close(true)
-                copyIn.endCopy()
+                if (copyIn.isActive) {
+                    copyIn.endCopy()
+                }
             }
         }
 
