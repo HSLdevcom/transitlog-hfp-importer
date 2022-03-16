@@ -1,4 +1,4 @@
-# transitlog-hfp-importer
+# transitlog-hfp-importer [![Test and create Docker image](https://github.com/HSLdevcom/transitlog-hfp-importer/actions/workflows/test-and-build.yml/badge.svg)](https://github.com/HSLdevcom/transitlog-hfp-importer/actions/workflows/test-and-build.yml)
 
 Application for importing [HFP data from compressed CSV archives](https://github.com/HSLdevcom/transitlog-hfp-csv-sink) to Transitlog database.
 
@@ -12,8 +12,14 @@ JAR file will be available in `build/libs/transitlog-hfp-importer.jar`
 
 ## Usage
 
+JAR file:
 ```bash
 java -jar transitlog-hfp-importer.jar -s <blob storage connection string> -c <blob container> -d <database connection string> -f <timestamp from> -t <timestamp to> 
+```
+
+Docker:
+```bash
+docker run -it hsldevcom/transitlog-hfp-importer:dev -s <blob storage connection string> -c <blob container> -d <database connection string> -f <timestamp from> -t <timestamp to> 
 ```
 
 Options:
