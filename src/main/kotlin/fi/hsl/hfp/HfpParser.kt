@@ -32,7 +32,7 @@ class HfpParser {
         CSVFormat.RFC4180.withFirstRecordAsHeader()
     )
 
-    fun parseHfpCsvArchive(path: Path): HfpArchive {
+    fun parseHfpCsvArchive(path: Path, deleteAfterParsing: Boolean = false): HfpArchive {
         val fileSize = Files.size(path) / 1024 / 1024
 
         var eventType: String? = null
@@ -165,6 +165,10 @@ class HfpParser {
         }
 
         log.info { "Processed $path ($fileSize MB, ${timedValue.value.size} rows) in ${timedValue.duration.inWholeSeconds} seconds " }
+
+        if (deleteAfterParsing) {
+            Files.deleteIfExists(path)
+        }
 
         return HfpArchive(eventType!!, timedValue.value)
     }

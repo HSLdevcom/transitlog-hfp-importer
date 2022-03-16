@@ -58,7 +58,7 @@ class HfpImporter(private val dataDirectory: Path, private val blobServiceClient
                         break
                     }
                     is BlobQueueItem.Blob -> {
-                        hfpArchiveQueue.put(HfpArchiveQueueItem.Archive(hfpParser.parseHfpCsvArchive(blobQueueItem.path)))
+                        hfpArchiveQueue.put(HfpArchiveQueueItem.Archive(hfpParser.parseHfpCsvArchive(blobQueueItem.path, deleteAfterParsing = true)))
                     }
                 }
             }
