@@ -15,7 +15,7 @@ dependencies {
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
 
     implementation 'ch.qos.logback:logback-classic:1.4.5'
-    implementation 'io.github.microutils:kotlin-logging-jvm:2.1.21'
+    implementation 'io.github.microutils:kotlin-logging-jvm:3.0.4'
 
     implementation 'org.postgresql:postgresql:42.3.1'
 
