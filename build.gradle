@@ -22,7 +22,7 @@ dependencies {
     implementation "com.azure:azure-storage-blob:12.13.0"
     implementation "io.netty:netty-tcnative-boringssl-static:2.0.39.Final"
 
-    implementation "org.apache.commons:commons-csv:1.8"
+    implementation "org.apache.commons:commons-csv:1.10.0"
     implementation "org.apache.commons:commons-compress:1.22"
     implementation 'com.github.luben:zstd-jni:1.5.2-5'
 
